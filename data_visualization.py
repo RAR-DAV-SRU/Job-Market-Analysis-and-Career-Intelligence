@@ -11,7 +11,12 @@ from pathlib import Path
 import pandas as pd
 import matplotlib.pyplot as plt
 
-BASE_DIR = Path(__file__).resolve().parent
+try:
+    BASE_DIR = Path(__file__).resolve().parent
+except NameError:
+    # Fallback for Google Colab and Jupyter Notebooks
+    BASE_DIR = Path.cwd()
+
 INPUT_FILE = BASE_DIR / "CareerLens_Cleaned_Data.xlsx"
 OUTPUT_DIR = BASE_DIR / "visualization_output"
 OUTPUT_DIR.mkdir(exist_ok=True)
@@ -39,7 +44,7 @@ def main():
     df.columns = df.columns.str.strip()
 
     # Convert numerical columns safely
-    for col in ["Age", "Experience_Years", "Technical_Skill_%", "Communication_%", "Career_Readiness_%"]:
+    for col in ["Age", "Experience_Years", "Technical_Skill_Pct", "Communication_Pct", "Career_Readiness_Pct"]:
         if col in df.columns:
             df[col] = pd.to_numeric(df[col], errors="coerce")
 
@@ -79,11 +84,11 @@ def main():
         plt.close()
 
     # 4. Average skill and career-readiness percentages
-    score_cols = ["Technical_Skill_%", "Communication_%", "Career_Readiness_%"]
+    score_cols = ["Technical_Skill_Pct", "Communication_Pct", "Career_Readiness_Pct"]
     available_scores = [col for col in score_cols if col in df.columns]
     if available_scores:
         averages = df[available_scores].mean().dropna()
-        averages.index = [name.replace("_", " ").replace("%", "(%)") for name in averages.index]
+        averages.index = [name.replace("_", " ").replace("Pct", "(%)") for name in averages.index]
         plt.figure(figsize=(9, 6))
         averages.plot(kind="bar")
         plt.title("Average Skills and Career Readiness")
@@ -96,9 +101,9 @@ def main():
         plt.close()
 
     # 5. Career readiness by role
-    if {"Current_Role", "Career_Readiness_%"} <= set(df.columns):
+    if {"Current_Role", "Career_Readiness_Pct"} <= set(df.columns):
         role_readiness = (
-            df.groupby("Current_Role")["Career_Readiness_%"]
+            df.groupby("Current_Role")["Career_Readiness_Pct"]
               .mean()
               .dropna()
               .sort_values()
@@ -140,11 +145,11 @@ def main():
             plt.close()
 
     # 8. Technical skill vs communication skill
-    if {"Technical_Skill_%", "Communication_%"} <= set(df.columns):
-        plot_data = df[["Technical_Skill_%", "Communication_%"]].dropna()
+    if {"Technical_Skill_Pct", "Communication_Pct"} <= set(df.columns):
+        plot_data = df[["Technical_Skill_Pct", "Communication_Pct"]].dropna()
         if not plot_data.empty:
             plt.figure(figsize=(8, 6))
-            plt.scatter(plot_data["Technical_Skill_%"], plot_data["Communication_%"], alpha=0.65)
+            plt.scatter(plot_data["Technical_Skill_Pct"], plot_data["Communication_Pct"], alpha=0.65)
             plt.title("Technical Skills vs Communication Skills")
             plt.xlabel("Technical Skill (%)")
             plt.ylabel("Communication (%)")
