@@ -95,3 +95,34 @@ with pd.ExcelWriter(out) as w:
     role.to_excel(w, sheet_name="Role_Analytics", index=False)
     loc.to_excel(w, sheet_name="Location_Analytics", index=False)
 files.download(out)
+
+
+
+OUTPUT:
+Cleaned shape: (500, 16)
+Missing values:
+ Member_ID               0
+Member_Name             0
+Age                     0
+Education               0
+Specialization          0
+Location                0
+Industry                0
+Current_Role            0
+Top_Skill               0
+Experience_Years        0
+Job_Status              0
+Salary_Range            0
+Technical_Skill_Pct     0
+Communication_Pct       0
+Career_Readiness_Pct    0
+Career_Level            0
+dtype: int64
+
+Job status counts:
+ Job_Status
+Employed           351
+Looking for Job     70
+Higher Studies      57
+Internship          22
+Name: count, dtype: int64
