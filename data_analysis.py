@@ -10,7 +10,12 @@ Outputs are saved in a folder named "analysis_output".
 from pathlib import Path
 import pandas as pd
 
-BASE_DIR = Path(__file__).resolve().parent
+try:
+    BASE_DIR = Path(__file__).resolve().parent
+except NameError:
+    # Fallback for Jupyter Notebook / Google Colab environments where __file__ is not defined
+    BASE_DIR = Path.cwd()
+
 INPUT_FILE = BASE_DIR / "CareerLens_Cleaned_Data.xlsx"
 OUTPUT_DIR = BASE_DIR / "analysis_output"
 OUTPUT_DIR.mkdir(exist_ok=True)
@@ -30,8 +35,8 @@ def main():
         df[col] = df[col].astype("string").str.strip()
 
     numeric_cols = [
-        "Age", "Experience_Years", "Technical_Skill_%",
-        "Communication_%", "Career_Readiness_%"
+        "Age", "Experience_Years", "Technical_Skill_Pct",
+        "Communication_Pct", "Career_Readiness_Pct"
     ]
     for col in numeric_cols:
         if col in df.columns:
@@ -76,13 +81,13 @@ def main():
         job_status.to_csv(OUTPUT_DIR / "job_status_analysis.csv", index=False)
 
     # 6. Career-readiness analysis by role
-    if {"Current_Role", "Career_Readiness_%", "Technical_Skill_%"} <= set(df.columns):
+    if {"Current_Role", "Career_Readiness_Pct", "Technical_Skill_Pct"} <= set(df.columns):
         role_analysis = (
             df.groupby("Current_Role")
               .agg(
                   Members=("Current_Role", "size"),
-                  Avg_Career_Readiness=("Career_Readiness_%", "mean"),
-                  Avg_Technical_Skill=("Technical_Skill_%", "mean")
+                  Avg_Career_Readiness=("Career_Readiness_Pct", "mean"),
+                  Avg_Technical_Skill=("Technical_Skill_Pct", "mean")
               )
               .round(2)
               .sort_values("Members", ascending=False)
